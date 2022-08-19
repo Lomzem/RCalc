@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Share Calc</title>
+</head>
+<body>
+	<h3>Balance</h3>
+	<input type="text" id="balance" value=60000 onkeyup="myFunction()">
+	<h3>Entry Price</h3>
+	<input type="text" id="entry" autofocus onkeyup="myFunction()">
+	<h3>Stop Price</h3>
+	<input type="text" id="stop" onkeyup="myFunction()">
+	<h3>Percent Loss</h3>
+	<input type="text" id="percLoss" value="5" onkeyup="myFunction()">
+	<h3>Use Leverage</h3>
+	<input type="text" id="leverage" value="2" onkeyup="myFunction()">
+
+	<br/><br/><br/>
+	<div id="output"></div>
+	
+	<script type="text/javascript">
+
+		function myFunction() {
+			var balance = document.getElementById('balance').value;
+			var entry = document.getElementById('entry').value / 100;
+			var stop = document.getElementById('stop').value / 100;
+			var centRisk = Math.abs(stop - entry);
+			var percLoss = document.getElementById('percLoss').value / 100;
+			var leverage = document.getElementById('leverage').value;
+
+			if (entry < 3) {
+				leverage = 1;
+			}
+			else if (leverage > 2) {
+				leverage = 2;
+			}
+
+			balance = parseFloat(balance.replace(',', ''));
+
+			var maxBP = balance * leverage;
+			var finalText = '';
+
+			var maxLoss = balance * percLoss;
+			var maxShares = maxLoss / centRisk;
+
+			if (maxShares * entry > maxBP) {
+				maxShares = maxBP / entry;
+			}
+
+			maxShares = Math.round(maxShares * 100) / 100;
+			var flooredShares = Math.floor(maxShares / 100) * 100;
+
+			var flooredBP = Math.round(flooredShares * entry * 100) / 100;
+
+			var dividedShares = 0;
+			var pieces = Math.ceil(flooredShares / 10000);
+
+			dividedShares = flooredShares / pieces;
+			dividedShares = Math.round(dividedShares * 10) / 10;
+
+			var realMaxLoss = Math.abs(stop - entry) * flooredShares;
+			realMaxLoss = Math.round(realMaxLoss * 100) / 100;
+
+			flooredExposure = flooredBP.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+			finalText = 'Max Shares: ' + maxShares;
+			finalText += '<br/>Floored Shares: ' + flooredShares;
+			finalText += '<br/>Divided: ' + dividedShares + ' in ' + pieces + ' parts';
+			finalText += '<br/>Risking: $' + realMaxLoss + ' with $' + flooredExposure + ' exposure';
+			output.innerHTML = finalText;
+		}
+
+	</script>
+</body>
+</html>
